@@ -23,6 +23,8 @@ To use, first:
 Here is one example of using Interpose along with gorilla/mux to create
 middleware that adds JSON headers to every response.
 
+Create a file with the following:
+
 ```go
 package main
 
@@ -63,6 +65,10 @@ func main() {
 	graceful.Run(":3001", 10*time.Second, mw)
 }
 ```
+
+In the same path as that file, type `go run *.go`
+
+Now launch your browser and point it to `http://localhost:3001/world` to see output.
 
 ## Philosophy
 
