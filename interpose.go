@@ -7,6 +7,21 @@ any addition to the http.Handler interface.
 From the view of a sandwich, the first middleware that you add gets called in
 the middle, while the last middleware that you add gets called first (and can
 make additional calls after earlier middleware finishes).
+
+The actual call stack of our chain of handlers starts from the last
+added and ends with the first added. For example, if there are 3
+middlewares added in order (0, 1, 2), the calls look like so:
+
+//2 START
+	//1 START
+		//0 START
+		//0 END
+	//1 END
+//2 END
+
+Therefore, the last middleware generator to be added will not only be
+the first to be called, but will also have the opportunity to make the
+final call after the rest of the middleware is called
 */
 package interpose
 
@@ -32,7 +47,7 @@ func (mw *Middleware) Use(handler func(http.Handler) http.Handler) {
 	mw.Wares = append(mw.Wares, handler)
 }
 
-// Add a pice of middleware which is simply any http.Handler
+// Add a piece of middleware which is simply any http.Handler
 // (signature: http.Handler). Unlike with Use, we will automatically call
 // .ServeHTTP to ensure that the rest of the middleware stack is called.
 func (mw *Middleware) UseHandler(handler http.Handler) {
@@ -46,6 +61,7 @@ func (mw *Middleware) UseHandler(handler http.Handler) {
 	mw.Use(x)
 }
 
+// Satisfies the net/http Handler interface and calls the middleware stack
 func (mw *Middleware) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if len(mw.Wares) < 1 {
 		return
@@ -54,22 +70,7 @@ func (mw *Middleware) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	//Initialize with an empty http.Handler
 	next := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {}))
 
-	/*
-		The actual call stack of our chain of handlers starts from the last
-		added and ends with the first added. For example, if there are 3
-		middlewares added in order (0, 1, 2), the calls look like so:
-
-			//2 START
-				//1 START
-					//0 START
-					//0 END
-				//1 END
-			//2 END
-
-		Therefore, the last middleware generator to be added will not only be
-		the first to be called, but will also have the opportunity to make the
-		final call after the rest of the middleware is called
-	*/
+	//Call the middleware stack
 	for _, generate := range mw.Wares {
 		next = generate(next)
 	}
