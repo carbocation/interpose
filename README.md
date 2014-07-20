@@ -18,6 +18,8 @@ To use, first:
 
 `go get github.com/carbocation/interpose`
 
+## basic usage example
+
 Here is one example of using Interpose along with gorilla/mux to create
 middleware that adds JSON headers to every response.
 
@@ -61,6 +63,33 @@ func main() {
 	graceful.Run(":3001", 10*time.Second, mw)
 }
 ```
+
+## Philosophy
+
+Interpose is a minimalist Golang middleware that uses only http.Handler and
+func(http.Handler)http.Handler . Interpose takes advantage of closures to create
+a stack of native net/http middleware. Unlike other middleware libraries which
+create their own net/http-like signatures, interpose uses literal net/http
+signatures, thus minimizing package lock-in and maximizing inter-compatibility.
+
+From the view of a sandwich, the first middleware that you add gets called in
+the middle, while the last middleware that you add gets called first (and can
+make additional calls after earlier middleware finishes).
+
+The actual call stack of our chain of handlers starts from the last
+added and ends with the first added. For example, if there are 3
+middlewares added in order (0, 1, 2), the calls look like so:
+
+	//2 START
+		//1 START
+			//0 START
+			//0 END
+		//1 END
+	//2 END
+
+Therefore, the last middleware generator to be added will not only be
+the first to be called, but will also have the opportunity to make the
+final call after the rest of the middleware is called
 
 ## Middleware
 
