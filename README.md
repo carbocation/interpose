@@ -60,6 +60,5 @@ Here is a current list of Interpose compatible middleware. Feel free to put up a
 | -----------|--------|-------------|
 | [Graceful](https://github.com/stretchr/graceful) | [Tyler Bunnell](https://github.com/tylerb) | Graceful HTTP Shutdown |
 | [secure](https://github.com/unrolled/secure) | [Cory Jacobsen](https://github.com/unrolled) | Middleware that implements a few quick security wins |
-| [logrus](https://github.com/carbocation/interpose/examples/adaptors/logrus/logrus.go) | [Dan Buch](https://github.com/meatballhat) | Logrus-based logger demonstrating how Negroni packages can be used in Interpose |
-| [buffer](https://github.com/carbocation/interpose/middleware/buffer/buffer.go) | [carbocation](https://github.com/carbocation) | Output buffering demonstrating how headers can be written after HTTP body is sent |
-| [gzip](https://github.com/phyber/negroni-gzip) | [phyber](https://github.com/phyber) | GZIP response compression |
+| [logrus](https://github.com/carbocation/interpose/blob/master/examples/adaptors/logrus/main.go) | [Dan Buch](https://github.com/meatballhat) | Logrus-based logger demonstrating how Negroni packages can be used in Interpose |
+| [buffer](https://github.com/carbocation/interpose/blob/master/examples/buffer/main.go) | [carbocation](https://github.com/carbocation) | Output buffering demonstrating how headers can be written after HTTP body is sent |
