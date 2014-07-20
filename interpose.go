@@ -1,8 +1,9 @@
 /*
 Interpose is a minimalist Golang middleware that uses only http.Handler and
-func(http.Handler)http.Handler taking advantage of closures to create a stack
-of native net/http middleware that doesn't break, smudge, or otherwise require
-any addition to the http.Handler interface.
+func(http.Handler)http.Handler . Interpose takes advantage of closures to create
+a stack of native net/http middleware. Unlike other middleware libraries which
+create their own net/http-like signatures, interpose uses literal net/http
+signatures, thus minimizing package lock-in and maximizing inter-compatibility.
 
 From the view of a sandwich, the first middleware that you add gets called in
 the middle, while the last middleware that you add gets called first (and can
@@ -12,12 +13,12 @@ The actual call stack of our chain of handlers starts from the last
 added and ends with the first added. For example, if there are 3
 middlewares added in order (0, 1, 2), the calls look like so:
 
-//2 START
-	//1 START
-		//0 START
-		//0 END
-	//1 END
-//2 END
+	//2 START
+		//1 START
+			//0 START
+			//0 END
+		//1 END
+	//2 END
 
 Therefore, the last middleware generator to be added will not only be
 the first to be called, but will also have the opportunity to make the
