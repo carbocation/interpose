@@ -1,16 +1,3 @@
-interpose
-=========
-
-Interpose is a minimalist net/http middleware for golang
-
-To use, first:
-
-`go get github.com/carbocation/interpose`
-
-Here is one example of using Interpose along with gorilla/mux to create
-middleware that adds JSON headers to every response.
-
-```go
 package main
 
 import (
@@ -49,4 +36,3 @@ func main() {
 	// connections to end
 	graceful.Run(":3001", 10*time.Second, mw)
 }
-```
