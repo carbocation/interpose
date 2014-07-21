@@ -233,3 +233,8 @@ func main() {
 }
 
 ```
+
+## Authors
+Originally developed by [carbocation](https://github.com/carbocation). Please see the 
+[contributors](https://github.com/carbocation/interpose/blob/master/CONTRIBUTORS.md) 
+file for an expanded list of contributors.
