@@ -1,18 +1,22 @@
 interpose
 =========
 
-Interpose is a minimalist net/http middleware for golang. It uses 
+Interpose is a minimalist net/http middleware framework for golang. It uses 
 http.Handler as its core unit of functionality, minimizing complexity
 and maximizing inter-operability with other middleware frameworks.
 
+All that it does is manage middleware. It comes with nothing baked in. You 
+bring your own router, etc. See below for some well-baked examples.
+
 Because of its reliance on the net/http standard, Interpose is out-of-the-box 
 compatible with the Gorilla framework, goji, nosurf, and many other frameworks and 
-standalone middleware.
+standalone middleware. 
 
-A goal of the project is also to create adaptors so that non-http.Handler 
-compliant middleware can still be used. As an example of this, an adaptor 
-for Negroni middleware is available, making any middleware that is 
-Negroni compliant also Interpose compliant. 
+Many projects claim to be http.Handler-compliant but actually just use http.Handlers 
+to create a more complicated/less compatible abstraction. Therefore, a goal of the 
+project is also to create adaptors so that non-http.Handler compliant middleware can 
+still be used. As an example of this, an adaptor for Negroni middleware is available, 
+making **any middleware that is Negroni compliant also Interpose compliant**. 
 
 To use, first:
 
@@ -69,6 +73,8 @@ func main() {
 In the same path as that file, type `go run *.go`
 
 Now launch your browser and point it to `http://localhost:3001/world` to see output.
+
+Additional examples can be found below.
 
 ## Philosophy
 
