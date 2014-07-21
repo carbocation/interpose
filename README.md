@@ -113,6 +113,7 @@ to other middleware are encouraged.
 | [Logrus](https://github.com/meatballhat/negroni-logrus) | [Logrus example](https://github.com/carbocation/interpose/blob/master/examples/adaptors/logrus/main.go) | [Dan Buch](https://github.com/meatballhat) | Logrus-based logger, also demonstrating how Negroni packages can be used in Interpose |
 | [Buffered output](https://github.com/goods/httpbuf) | [Buffer example](https://github.com/carbocation/interpose/blob/master/examples/buffer/main.go) | [zeebo](https://github.com/zeebo) | Output buffering demonstrating how headers can be written after HTTP body is sent |
 | [nosurf](https://github.com/justinas/nosurf) | [nosurf example](https://github.com/carbocation/interpose/blob/master/examples/nosurf/main.go) | [justinas](https://github.com/justinas) | A CSRF protection middleware for Go. |
+| [BasicAuth](https://github.com/carbocation/interpose/blob/master/middleware/basicAuth.go)| [BasicAuth example](https://github.com/carbocation/interpose/blob/master/examples/basicAuth/main.go)| [Jeremy Saenz](http://github.com/codegangsta) & [Brendon Murphy](http://github.com/bemurphy) | [HTTP BasicAuth](https://en.wikipedia.org/wiki/Basic_access_authentication) - based on martini's [auth](https://github.com/codegangsta/martini-contrib/tree/master/auth) middleware|
 
 ## Adaptors
 
