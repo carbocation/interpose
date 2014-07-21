@@ -7,6 +7,6 @@ import (
 	"github.com/meatballhat/negroni-logrus"
 )
 
-func Logrus() func(http.Handler) http.Handler {
+func NegroniLogrus() func(http.Handler) http.Handler {
 	return adaptors.FromNegroni(negronilogrus.NewMiddleware())
 }

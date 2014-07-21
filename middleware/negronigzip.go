@@ -7,6 +7,6 @@ import (
 	"github.com/phyber/negroni-gzip/gzip"
 )
 
-func Gzip(compression int) func(http.Handler) http.Handler {
+func NegroniGzip(compression int) func(http.Handler) http.Handler {
 	return adaptors.FromNegroni(gzip.Gzip(compression))
 }
