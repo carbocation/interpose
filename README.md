@@ -123,7 +123,11 @@ github.com/codegangsta/negroni middleware in Interpose, you can use
 ```go
 	middle := interpose.New()
 
-	middle.Use(adaptors.FromNegroni(negronilogrus.NewMiddleware()))
+	// has signature `negroni.Handler`
+	negroniMiddleware := negronilogrus.NewMiddleware()
+
+	// Use the Negroni middleware within Interpose
+	middle.Use(adaptors.FromNegroni(negroniMiddleware))
 
 ```
 
