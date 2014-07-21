@@ -113,6 +113,20 @@ to other middleware are encouraged.
 | [Logrus](https://github.com/meatballhat/negroni-logrus) | [Logrus example](https://github.com/carbocation/interpose/blob/master/examples/adaptors/logrus/main.go) | [Dan Buch](https://github.com/meatballhat) | Logrus-based logger, also demonstrating how Negroni packages can be used in Interpose |
 | [Buffered output](https://github.com/goods/httpbuf) | [Buffer example](https://github.com/carbocation/interpose/blob/master/examples/buffer/main.go) | [zeebo](https://github.com/zeebo) | Output buffering demonstrating how headers can be written after HTTP body is sent |
 
+## Adaptors
+
+Some frameworks that are not strictly `http.Handler` compliant use middleware that 
+can be readily converted into Interpose-compliant middleware. For example, to use 
+github.com/codegangsta/negroni middleware in Interpose, you can use 
+`adaptors.FromNegroni`:
+
+```go
+	middle := interpose.New()
+
+	middle.Use(adaptors.FromNegroni(negronilogrus.NewMiddleware()))
+
+```
+
 ## More examples
 
 ### Combined logging and gzipping
