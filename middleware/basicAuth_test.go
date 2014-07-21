@@ -32,11 +32,9 @@ func Test_SecureCompare(t *testing.T) {
 
 func Test_BasicAuth(t *testing.T) {
 	recorder := httptest.NewRecorder()
-
 	auth := "Basic " + base64.StdEncoding.EncodeToString([]byte("foo:bar"))
 
 	i := interpose.New()
-
 	i.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			w.Write([]byte("hello"))
@@ -66,5 +64,63 @@ func Test_BasicAuth(t *testing.T) {
 
 	if recorder.Body.String() != "hello" {
 		t.Error("Auth failed, got: ", recorder.Body.String())
+	}
+}
+
+func Test_BasicAuthFunc(t *testing.T) {
+	for auth, valid := range map[string]bool{
+		"foo:spam":       true,
+		"bar:spam":       true,
+		"foo:eggs":       false,
+		"bar:eggs":       false,
+		"baz:spam":       false,
+		"foo:spam:extra": false,
+		"dummy:":         false,
+		"dummy":          false,
+		"":               false,
+	} {
+		recorder := httptest.NewRecorder()
+		encoded := "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
+
+		i := interpose.New()
+		i.Use(func(next http.Handler) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+				w.Write([]byte("hello"))
+				next.ServeHTTP(w, req)
+			})
+		})
+		i.Use(BasicAuthFunc(func(username, password string) bool {
+			return (username == "foo" || username == "bar") && password == "spam"
+		}))
+
+		r, _ := http.NewRequest("GET", "foo", nil)
+
+		i.ServeHTTP(recorder, r)
+
+		if recorder.Code != 401 {
+			t.Error("Response not 401, params:", auth)
+		}
+
+		if recorder.Body.String() == "hello" {
+			t.Error("Auth block failed, params:", auth)
+		}
+
+		recorder = httptest.NewRecorder()
+		r.Header.Set("Authorization", encoded)
+		i.ServeHTTP(recorder, r)
+
+		if valid && recorder.Code == 401 {
+			t.Error("Response is 401, params:", auth)
+		}
+		if !valid && recorder.Code != 401 {
+			t.Error("Response not 401, params:", auth)
+		}
+
+		if valid && recorder.Body.String() != "hello" {
+			t.Error("Auth failed, got: ", recorder.Body.String(), "params:", auth)
+		}
+		if !valid && recorder.Body.String() == "hello" {
+			t.Error("Auth block failed, params:", auth)
+		}
 	}
 }
