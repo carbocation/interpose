@@ -112,6 +112,7 @@ to other middleware are encouraged.
 | [Gorilla logger](https://github.com/gorilla/handlers) | [Gorilla log example](https://github.com/carbocation/interpose/blob/master/examples/gorillalog/main.go) | [Gorilla team](https://github.com/gorilla/) | Gorilla Apache CombinedLogger |
 | [Logrus](https://github.com/meatballhat/negroni-logrus) | [Logrus example](https://github.com/carbocation/interpose/blob/master/examples/adaptors/logrus/main.go) | [Dan Buch](https://github.com/meatballhat) | Logrus-based logger, also demonstrating how Negroni packages can be used in Interpose |
 | [Buffered output](https://github.com/goods/httpbuf) | [Buffer example](https://github.com/carbocation/interpose/blob/master/examples/buffer/main.go) | [zeebo](https://github.com/zeebo) | Output buffering demonstrating how headers can be written after HTTP body is sent |
+| [nosurf](https://github.com/justinas/nosurf) | [nosurf example](https://github.com/carbocation/interpose/blob/master/examples/nosurf/main.go) | [justinas](https://github.com/justinas) | A CSRF protection middleware for Go. |
 
 ## Adaptors
 
