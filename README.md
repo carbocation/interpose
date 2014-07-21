@@ -216,7 +216,7 @@ func main() {
 	// Now we will define a sub-router based on our love of the color green
 	// When you call any url such as http://localhost:3001/green/man , you will
 	// also see an HTTP header sent called X-Favorite-Color with value "green"
-	greenRouter := mux.NewRouter().Methods("GET").PathPrefix("/green").Subrouter() //Headers("Accept", "application/json")
+	greenRouter := mux.NewRouter().Methods("GET").PathPrefix("/green").Subrouter()
 	greenRouter.HandleFunc("/{user}", func(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(w, "Welcome to the home page, green %s!", mux.Vars(req)["user"])
 	})
