@@ -2,7 +2,7 @@ interpose
 =========
 
 Interpose is a minimalist net/http middleware framework for golang. It uses 
-http.Handler as its core unit of functionality, minimizing complexity
+`http.Handler` as its core unit of functionality, minimizing complexity
 and maximizing inter-operability with other middleware frameworks.
 
 All that it does is manage middleware. It comes with nothing baked in. You 
@@ -12,9 +12,9 @@ Because of its reliance on the net/http standard, Interpose is out-of-the-box
 compatible with the Gorilla framework, goji, nosurf, and many other frameworks and 
 standalone middleware. 
 
-Many projects claim to be http.Handler-compliant but actually just use http.Handlers 
+Many projects claim to be `http.Handler`-compliant but actually just use `http.Handlers` 
 to create a more complicated/less compatible abstraction. Therefore, a goal of the 
-project is also to create adaptors so that non-http.Handler compliant middleware can 
+project is also to create adaptors so that non-`http.Handler` compliant middleware can 
 still be used. As an example of this, an adaptor for Negroni middleware is available, 
 meaning that **any middleware that is Negroni compliant is also Interpose compliant**. 
 
@@ -78,8 +78,8 @@ Additional examples can be found below.
 
 ## Philosophy
 
-Interpose is a minimalist Golang middleware that uses only http.Handler and
-func(http.Handler)http.Handler . Interpose takes advantage of closures to create
+Interpose is a minimalist Golang middleware that uses only `http.Handler` and
+`func(http.Handler)http.Handler`. Interpose takes advantage of closures to create
 a stack of native net/http middleware. Unlike other middleware libraries which
 create their own net/http-like signatures, interpose uses literal net/http
 signatures, thus minimizing package lock-in and maximizing inter-compatibility.
@@ -97,13 +97,12 @@ if there are 3 middlewares added in order (0, 1, 2), the calls look like so:
 		//1 END
 	//2 END
 
-Therefore, the last middleware generator to be added will not only be
-the first to be called, but will also have the opportunity to make the
-final call after the rest of the middleware is called
-
 ## Middleware
 
-Here is a current list of Interpose compatible middleware. Feel free to put up a PR linking your middleware if you have built one:
+Here is a current list of Interpose compatible middleware that have pre-built 
+examples working with Interpose. Any middleware that yields an `http.Handler` 
+or a `func(http.Handler)http.Handler` should be compliant. Pull requests linking 
+to other middleware are encouraged.
 
 
 | Middleware | Usage example | Author | Description |
