@@ -180,10 +180,60 @@ func main() {
 
 ```
 
+### Wrapped middleware
+
+Middleware can be wrapped around other middleware. In this example, 
+we greet people who arrive at `/{user}`, but we offer a special greeting
+to those who arrive at `/green/{user}`:
+
+```go
+package main
+
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/carbocation/interpose"
+	"github.com/carbocation/interpose/middleware"
+	"github.com/gorilla/mux"
+)
+
+func main() {
+	middle := interpose.New()
+
+	router := mux.NewRouter()
+	router.Handle("/{name}", http.HandlerFunc(welcomeHandler))
+	router.PathPrefix("/green").Subrouter().Handle("/{name}", Green(http.HandlerFunc(welcomeHandler)))
+
+	middle.UseHandler(router)
+
+	// Using Gorilla framework's combined logger
+	middle.Use(middleware.GorillaLog())
+
+	http.ListenAndServe(":3001", middle)
+}
+
+func welcomeHandler(rw http.ResponseWriter, req *http.Request) {
+	fmt.Fprintf(rw, "Welcome to the home page, %s", mux.Vars(req)["name"])
+}
+
+func Green(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		rw.Header().Set("X-Favorite-Color", "green")
+		next.ServeHTTP(rw, req)
+		fmt.Fprint(rw, " who likes green")
+	})
+}
+
+```
+
 ### Nested middleware: adding headers for only some routes
 
-Apply different middleware to different routes. In this example, 
-routes starting with /green are given a special HTTP header X-Favorite-Color: green, 
+In the last example, we applied different middleware to different routes. 
+Here we will expand this idea to created fully nested middleware stacks 
+within different routes. This approach, while more verbose than the last 
+example, is arbitrarily powerful. In this example, routes starting with 
+/green are given a special HTTP header X-Favorite-Color: green, 
 but you can also imagine using this same approach to automatically apply 
 the JSON content header for JSON requests, putting authentication in front of
 protected paths, etc.
