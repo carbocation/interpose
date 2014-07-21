@@ -23,7 +23,7 @@ func main() {
 	// When you call any url starting with the path /protected, you will need to authenticate
 	protectedRouter := mux.NewRouter().Methods("GET").PathPrefix("/protected").Subrouter()
 	protectedRouter.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
-		fmt.Fprintf(w, "Welcome to the protected page %s!", mux.Vars(req)["user"])
+		fmt.Fprintf(w, "Welcome to the protected page!")
 	})
 
 	protectedMiddlew := interpose.New()
