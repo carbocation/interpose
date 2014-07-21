@@ -25,53 +25,49 @@ To use, first:
 
 ## basic usage example
 
-Here is one example of using Interpose along with gorilla/mux to create
-middleware that adds JSON headers to every response.
+Here is one example of using Interpose to execute 
+middleware that adds the HTTP header "X-Server-Name" to every response.
 
-Create a file with the following:
-
+Create a file `main.go` with the following:
 ```go
 package main
 
 import (
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/carbocation/interpose"
-	"github.com/gorilla/mux"
-	"github.com/stretchr/graceful"
 )
 
 func main() {
-	router := mux.NewRouter()
+	// In this example, we use a basic router with a catchall route that
+	// matches any path. In other examples in this project, we use a
+	// more advanced router.
+	router := http.NewServeMux()
+	router.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		fmt.Fprintf(w, "Welcome to %s!", req.URL.Path)
+	}))
 
-	router.HandleFunc("/{user}", func(w http.ResponseWriter, req *http.Request) {
-		fmt.Fprintf(w, "Welcome to the home page, %s!", mux.Vars(req)["user"])
-	})
+	middle := interpose.New()
 
-	mw := interpose.New()
+	// Apply the router. The first added is the last executed, so by adding
+	// the router first, our other middleware can modify HTTP headers before our
+	// router writes to the HTTP Body
+	middle.UseHandler(router)
 
-	// Apply the router. By adding it first, all of our other middleware will be
-	// executed before the router, allowing us to modify headers before any
-	// output has been generated.
-	mw.UseHandler(router)
+	// Send a header telling the world this is coming from an Interpose Test Server
+	// You could imagine setting Content-type application/json or other useful
+	// headers in other circumstances.
+	middle.UseHandler(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		rw.Header().Set("X-Server-Name", "Interpose Test Server")
+	}))
 
-	// Tell the browser our output will be JSON
-	mw.Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			next.ServeHTTP(w, req)
-		})
-	})
-
-	// Launch and permit graceful shutdown, allowing up to 10 seconds for existing
-	// connections to end
-	graceful.Run(":3001", 10*time.Second, mw)
+	http.ListenAndServe(":3001", middle)
 }
+
 ```
 
-In the same path as that file, type `go run *.go`
+In the same path as that file, type `go run main.go`
 
 Now launch your browser and point it to `http://localhost:3001/world` to see output.
 
@@ -120,9 +116,11 @@ to other middleware are encouraged.
 ## Adaptors
 
 Some frameworks that are not strictly `http.Handler` compliant use middleware that 
-can be readily converted into Interpose-compliant middleware. For example, to use 
-github.com/codegangsta/negroni middleware in Interpose, you can use 
-`adaptors.FromNegroni`:
+can be readily converted into Interpose-compliant middleware. So far, adaptors for 
+Martini and Negroni have been created. 
+
+For example, to use github.com/codegangsta/negroni middleware in Interpose, you 
+can use `adaptors.FromNegroni`:
 
 ```go
 	middle := interpose.New()
@@ -136,6 +134,56 @@ github.com/codegangsta/negroni middleware in Interpose, you can use
 ```
 
 ## More examples
+
+### Routing, graceful shutdown, and JSON headers
+
+In this example, we use the `graceful` package to gracefully release 
+connections after the shutdown signal is encountered. A more powerful 
+router than in our prior example, Gorilla mux, is used. Also, we send 
+the browser headers indicating that this is a JSON response (which, 
+however, it is not).
+
+```go
+package main
+
+import (
+	"fmt"
+	"net/http"
+	"time"
+
+	"github.com/carbocation/interpose"
+	"github.com/gorilla/mux"
+	"github.com/stretchr/graceful"
+)
+
+func main() {
+	router := mux.NewRouter()
+
+	router.HandleFunc("/{user}", func(w http.ResponseWriter, req *http.Request) {
+		fmt.Fprintf(w, "Welcome to the home page, %s!", mux.Vars(req)["user"])
+	})
+
+	middle := interpose.New()
+
+	// Apply the router. By adding it first, all of our other middleware will be
+	// executed before the router, allowing us to modify headers before any
+	// output has been generated.
+	middle.UseHandler(router)
+
+	// Tell the browser which server this came from
+	middle.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+			rw.Header().Set("X-Server-Name", "Interpose Test Server")
+			next.ServeHTTP(rw, req)
+		})
+	})
+
+	// Launch and permit graceful shutdown, allowing up to 10 seconds for existing
+	// connections to end
+	graceful.Run(":3001", 10*time.Second, middle)
+}
+
+```
 
 ### Combined logging and gzipping
 

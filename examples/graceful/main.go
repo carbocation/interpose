@@ -17,22 +17,22 @@ func main() {
 		fmt.Fprintf(w, "Welcome to the home page, %s!", mux.Vars(req)["user"])
 	})
 
-	mw := interpose.New()
+	middle := interpose.New()
 
 	// Apply the router. By adding it first, all of our other middleware will be
 	// executed before the router, allowing us to modify headers before any
 	// output has been generated.
-	mw.UseHandler(router)
+	middle.UseHandler(router)
 
-	// Tell the browser our output will be JSON
-	mw.Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			w.Header().Set("Content-Type", "application/json")
-			next.ServeHTTP(w, req)
+	// Tell the browser which server this came from
+	middle.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+			rw.Header().Set("X-Server-Name", "Interpose Test Server")
+			next.ServeHTTP(rw, req)
 		})
 	})
 
 	// Launch and permit graceful shutdown, allowing up to 10 seconds for existing
 	// connections to end
-	graceful.Run(":3001", 10*time.Second, mw)
+	graceful.Run(":3001", 10*time.Second, middle)
 }
