@@ -108,12 +108,12 @@ final call after the rest of the middleware is called
 Here is a current list of Interpose compatible middleware. Feel free to put up a PR linking your middleware if you have built one:
 
 
-| Middleware | Author | Description |
+| Middleware | Usage example | Author | Description |
 | -----------|--------|-------------|
-| [Graceful](https://github.com/stretchr/graceful) | [Tyler Bunnell](https://github.com/tylerb) | Graceful HTTP Shutdown |
-| [secure](https://github.com/unrolled/secure) | [Cory Jacobsen](https://github.com/unrolled) | Middleware that implements a few quick security wins |
-| [logrus](https://github.com/carbocation/interpose/blob/master/examples/adaptors/logrus/main.go) | [Dan Buch](https://github.com/meatballhat) | Logrus-based logger demonstrating how Negroni packages can be used in Interpose |
-| [buffer](https://github.com/carbocation/interpose/blob/master/examples/buffer/main.go) | [carbocation](https://github.com/carbocation) | Output buffering demonstrating how headers can be written after HTTP body is sent |
+| [Graceful](https://github.com/stretchr/graceful) | [Graceful example](https://github.com/carbocation/interpose/examples/graceful/main.go) | [Tyler Bunnell](https://github.com/tylerb) | Graceful HTTP Shutdown |
+| [secure](https://github.com/unrolled/secure) | Secure example coming | [Cory Jacobsen](https://github.com/unrolled) | Middleware that implements a few quick security wins |
+| [Logrus](https://github.com/meatballhat/negroni-logrus) | [Logrus example](https://github.com/carbocation/interpose/blob/master/examples/adaptors/logrus/main.go) | [Dan Buch](https://github.com/meatballhat) | Logrus-based logger, also demonstrating how Negroni packages can be used in Interpose |
+| Buffered output | [Buffer example](https://github.com/carbocation/interpose/blob/master/examples/buffer/main.go) | [carbocation](https://github.com/carbocation) | Output buffering demonstrating how headers can be written after HTTP body is sent |
 
 ## More examples
 
