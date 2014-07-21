@@ -14,10 +14,10 @@ this breaks streaming.
 
 Note: currently ignores errors
 */
-func Buffer(h http.Handler) http.Handler {
+func Buffer(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		bw := new(httpbuf.Buffer)
-		h.ServeHTTP(bw, r)
+		next.ServeHTTP(bw, r)
 		bw.Apply(w)
 	})
 }

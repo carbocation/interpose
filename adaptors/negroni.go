@@ -6,28 +6,24 @@ import (
 	"github.com/codegangsta/negroni"
 )
 
-type NegroniRW struct {
-	http.ResponseWriter
-	//http.Flusher
-}
+func FromNegroni(handler negroni.Handler) func(http.Handler) http.Handler {
+	n := negroni.New()
+	n.Use(handler)
 
-func (nrw NegroniRW) Status() int   { return 0 }
-func (nrw NegroniRW) Written() bool { return false }
-func (nrw NegroniRW) Size() int     { return 0 }
-func (nrw NegroniRW) Before(before func(negroni.ResponseWriter)) {
-	//nrw.beforeFuncs = append(nrw.beforeFuncs, before)
-}
-func (nrw NegroniRW) Flush() {
-	flusher, ok := nrw.ResponseWriter.(http.Flusher)
-	if ok {
-		flusher.Flush()
+	return func(next http.Handler) http.Handler {
+		n.UseHandler(next)
+		return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+			n.ServeHTTP(rw, req)
+			//next.ServeHTTP(rw, req)
+		})
 	}
 }
 
-func FromNegroni(handler negroni.Handler) http.Handler {
-	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-		newRW := negroni.ResponseWriter(NegroniRW{rw})
+func HandlerFromNegroni(handler negroni.Handler) http.Handler {
+	n := negroni.New()
+	n.Use(handler)
 
-		handler.ServeHTTP(newRW, req, http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {}))
+	return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		n.ServeHTTP(rw, req)
 	})
 }
