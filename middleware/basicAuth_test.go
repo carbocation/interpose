@@ -24,7 +24,7 @@ var comparetests = []struct {
 
 func Test_SecureCompare(t *testing.T) {
 	for _, tt := range comparetests {
-		if secureCompare(tt.a, tt.b) != tt.val {
+		if SecureCompare(tt.a, tt.b) != tt.val {
 			t.Errorf("Expected SecureCompare(%v, %v) to return %v but did not", tt.a, tt.b, tt.val)
 		}
 	}
@@ -89,7 +89,7 @@ func Test_BasicAuthFunc(t *testing.T) {
 				next.ServeHTTP(w, req)
 			})
 		})
-		i.Use(BasicAuthFunc(func(username, password string) bool {
+		i.Use(BasicAuthFunc(func(username, password string, _ *http.Request) bool {
 			return (username == "foo" || username == "bar") && password == "spam"
 		}))
 

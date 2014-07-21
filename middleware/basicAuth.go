@@ -21,7 +21,7 @@ func BasicAuth(username string, password string) func(http.Handler) http.Handler
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 			auth := req.Header.Get("Authorization")
-			if !secureCompare(auth, "Basic "+siteAuth) {
+			if !SecureCompare(auth, "Basic "+siteAuth) {
 				unauthorized(res)
 				return
 			}
@@ -32,7 +32,7 @@ func BasicAuth(username string, password string) func(http.Handler) http.Handler
 
 // BasicAuthFunc returns a Handler that authenticates via Basic Auth using the provided function.
 // The function should return true for a valid username/password combination.
-func BasicAuthFunc(authfn func(string, string) bool) func(http.Handler) http.Handler {
+func BasicAuthFunc(authfn func(string, string, *http.Request) bool) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 			auth := req.Header.Get("Authorization")
@@ -46,19 +46,17 @@ func BasicAuthFunc(authfn func(string, string) bool) func(http.Handler) http.Han
 				return
 			}
 			tokens := strings.SplitN(string(b), ":", 2)
-			if len(tokens) != 2 || !authfn(tokens[0], tokens[1]) {
+			if len(tokens) != 2 || !authfn(tokens[0], tokens[1], req) {
 				unauthorized(res)
 				return
 			}
-			// TODO: use gorilla to pass user in context?...
-			// c.Map(User(tokens[0]))
 			next.ServeHTTP(res, req)
 		})
 	}
 }
 
-// secureCompare performs a constant time compare of two strings to limit timing attacks.
-func secureCompare(given string, actual string) bool {
+// SecureCompare performs a constant time compare of two strings to limit timing attacks.
+func SecureCompare(given string, actual string) bool {
 	givenSha := sha256.Sum256([]byte(given))
 	actualSha := sha256.Sum256([]byte(actual))
 
