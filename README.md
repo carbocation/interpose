@@ -84,13 +84,11 @@ a stack of native net/http middleware. Unlike other middleware libraries which
 create their own net/http-like signatures, interpose uses literal net/http
 signatures, thus minimizing package lock-in and maximizing inter-compatibility.
 
-From the view of a sandwich, the first middleware that you add gets called in
-the middle, while the last middleware that you add gets called first (and can
-make additional calls after earlier middleware finishes).
-
-The actual call stack of our chain of handlers starts from the last
-added and ends with the first added. For example, if there are 3
-middlewares added in order (0, 1, 2), the calls look like so:
+Middleware is called in nested LIFO fashion, which means that the last middleware
+to be added will be the first middleware to be called. Because the middleware is
+nested, it actually means that the last middleware to be added gets the
+opportunity to make the first and the last calls in the stack. For example,
+if there are 3 middlewares added in order (0, 1, 2), the calls look like so:
 
 	//2 START
 		//1 START
