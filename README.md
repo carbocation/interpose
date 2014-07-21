@@ -16,7 +16,7 @@ Many projects claim to be http.Handler-compliant but actually just use http.Hand
 to create a more complicated/less compatible abstraction. Therefore, a goal of the 
 project is also to create adaptors so that non-http.Handler compliant middleware can 
 still be used. As an example of this, an adaptor for Negroni middleware is available, 
-making **any middleware that is Negroni compliant also Interpose compliant**. 
+meaning that **any middleware that is Negroni compliant is also Interpose compliant**. 
 
 To use, first:
 
