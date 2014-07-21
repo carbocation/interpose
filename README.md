@@ -17,6 +17,7 @@ to create a more complicated/less compatible abstraction. Therefore, a goal of t
 project is also to create adaptors so that non-`http.Handler` compliant middleware can 
 still be used. As an example of this, an adaptor for Negroni middleware is available, 
 meaning that **any middleware that is Negroni compliant is also Interpose compliant**. 
+The same is true for Martini middleware.
 
 To use, first:
 
@@ -114,6 +115,7 @@ to other middleware are encouraged.
 | [Buffered output](https://github.com/goods/httpbuf) | [Buffer example](https://github.com/carbocation/interpose/blob/master/examples/buffer/main.go) | [zeebo](https://github.com/zeebo) | Output buffering demonstrating how headers can be written after HTTP body is sent |
 | [nosurf](https://github.com/justinas/nosurf) | [nosurf example](https://github.com/carbocation/interpose/blob/master/examples/nosurf/main.go) | [justinas](https://github.com/justinas) | A CSRF protection middleware for Go. |
 | [BasicAuth](https://github.com/carbocation/interpose/blob/master/middleware/basicAuth.go)| [BasicAuth example](https://github.com/carbocation/interpose/blob/master/examples/basicAuth/main.go)| [Jeremy Saenz](http://github.com/codegangsta) & [Brendon Murphy](http://github.com/bemurphy) | [HTTP BasicAuth](https://en.wikipedia.org/wiki/Basic_access_authentication) - based on martini's [auth](https://github.com/codegangsta/martini-contrib/tree/master/auth) middleware|
+| [Martini Auth](https://github.com/martini-contrib/auth) | [Martini Auth example](https://github.com/carbocation/interpose/blob/master/examples/adaptors/martiniauth/main.go) | [Jeremy Saenz](https://github.com/codegangsta) & [Brendon Murphy](http://github.com/bemurphy) | A basic HTTP Auth implementation that also demonstrates how Martini middleware packages can be used directly in Interpose with a simple wrapper. |
 
 ## Adaptors
 
