@@ -234,6 +234,9 @@ func main() {
 
 ```
 
+For more examples, please look at the [examples folder](https://github.com/carbocation/interpose/tree/master/examples) 
+as well as its subfolder, the [menagerie folder](https://github.com/carbocation/interpose/tree/master/examples/menagerie)
+
 ## Authors
 Originally developed by [carbocation](https://github.com/carbocation). Please see the 
 [contributors](https://github.com/carbocation/interpose/blob/master/CONTRIBUTORS.md) 
