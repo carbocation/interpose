@@ -29,7 +29,7 @@ func main() {
 
 	// Use logrus
 	x := negroni.Handler(negronilogrus.NewMiddleware())
-	mw.UseHandler(adaptors.FromNegroni(x))
+	mw.Use(adaptors.FromNegroni(x))
 
 	// Launch and permit graceful shutdown, allowing up to 10 seconds for existing
 	// connections to end

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/carbocation/interpose"
-	"github.com/carbocation/interpose/middleware/buffer"
+	"github.com/carbocation/interpose/middleware"
 	"github.com/gorilla/mux"
 	"github.com/stretchr/graceful"
 )
@@ -39,7 +39,7 @@ func main() {
 	// Turn on output buffering. It's added last so it will be called first. This
 	// enables headers to be written after data is sent, because they're all stored
 	// in a buffer, so the user's browser will see everything in the order it expects.
-	mw.Use(buffer.Buffer)
+	mw.Use(middleware.Buffer())
 
 	// Launch and permit graceful shutdown, allowing up to 10 seconds for existing
 	// connections to end
