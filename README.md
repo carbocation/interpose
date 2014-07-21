@@ -109,7 +109,7 @@ Here is a current list of Interpose compatible middleware. Feel free to put up a
 
 
 | Middleware | Usage example | Author | Description |
-| -----------|--------|-------------|
+| -----------|---------------|--------|-------------|
 | [Graceful](https://github.com/stretchr/graceful) | [Graceful example](https://github.com/carbocation/interpose/examples/graceful/main.go) | [Tyler Bunnell](https://github.com/tylerb) | Graceful HTTP Shutdown |
 | [secure](https://github.com/unrolled/secure) | Secure example coming | [Cory Jacobsen](https://github.com/unrolled) | Middleware that implements a few quick security wins |
 | [Logrus](https://github.com/meatballhat/negroni-logrus) | [Logrus example](https://github.com/carbocation/interpose/blob/master/examples/adaptors/logrus/main.go) | [Dan Buch](https://github.com/meatballhat) | Logrus-based logger, also demonstrating how Negroni packages can be used in Interpose |
