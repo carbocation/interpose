@@ -140,8 +140,8 @@ can use `adaptors.FromNegroni`:
 In this example, we use the `graceful` package to gracefully release 
 connections after the shutdown signal is encountered. A more powerful 
 router than in our prior example, Gorilla mux, is used. Also, we send 
-the browser headers indicating that this is a JSON response (which, 
-however, it is not).
+the browser headers indicating that this came from a server named 
+"Interpose Test Server."
 
 ```go
 package main
