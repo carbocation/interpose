@@ -108,3 +108,48 @@ Here is a current list of Interpose compatible middleware. Feel free to put up a
 | [secure](https://github.com/unrolled/secure) | [Cory Jacobsen](https://github.com/unrolled) | Middleware that implements a few quick security wins |
 | [logrus](https://github.com/carbocation/interpose/blob/master/examples/adaptors/logrus/main.go) | [Dan Buch](https://github.com/meatballhat) | Logrus-based logger demonstrating how Negroni packages can be used in Interpose |
 | [buffer](https://github.com/carbocation/interpose/blob/master/examples/buffer/main.go) | [carbocation](https://github.com/carbocation) | Output buffering demonstrating how headers can be written after HTTP body is sent |
+
+## More examples
+
+Print an Apache CombinedLog-compatible log statement to StdOut and 
+gzip the HTTP response it if the client has gzip capabilities:
+
+```go
+package main
+
+import (
+	"compress/gzip"
+	"fmt"
+	"net/http"
+
+	"github.com/carbocation/interpose"
+	"github.com/carbocation/interpose/middleware"
+	"github.com/gorilla/mux"
+)
+
+func main() {
+	middle := interpose.New()
+
+	router := mux.NewRouter()
+	router.HandleFunc("/{user}", func(w http.ResponseWriter, req *http.Request) {
+		fmt.Fprintf(w, "Welcome to the home page, %s!", mux.Vars(req)["user"])
+	})
+
+	// First apply any middleware that modify the http body, since the first
+	// added will be the last applied. This permits other middleware to alter headers
+	middle.UseHandler(router)
+
+	// Now apply any middleware that will not write output to http body
+
+	// Log to stdout. Taken from Gorilla
+	middle.Use(middleware.GorillaLog())
+
+	// Gzip output. Taken from Negroni
+	middle.Use(middleware.NegroniGzip(gzip.DefaultCompression))
+
+	http.ListenAndServe(":3001", middle)
+}
+
+}
+
+```
