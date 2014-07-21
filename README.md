@@ -118,6 +118,8 @@ Here is a current list of Interpose compatible middleware. Feel free to put up a
 
 ## More examples
 
+### Combined logging and gzipping
+
 Print an Apache CombinedLog-compatible log statement to StdOut and 
 gzip the HTTP response it if the client has gzip capabilities:
 
@@ -158,6 +160,8 @@ func main() {
 }
 
 ```
+
+### Nested middleware
 
 Apply different middleware to different routes. In this example, 
 routes starting with /green are given a special HTTP header X-Favorite-Color: green, 
