@@ -159,7 +159,7 @@ func main() {
 
 ```
 
-### Nested middleware
+### Nested middleware: adding headers for only some routes
 
 Apply different middleware to different routes. In this example, 
 routes starting with /green are given a special HTTP header X-Favorite-Color: green, 
