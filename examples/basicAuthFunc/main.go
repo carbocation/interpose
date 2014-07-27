@@ -46,5 +46,5 @@ func main() {
 
 	router.Methods("GET").PathPrefix("/protected").Handler(protectedMiddlew)
 
-	http.ListenAndServe(":3001", middle)
+	http.ListenAndServe(":3001", context.ClearHandler(middle))
 }

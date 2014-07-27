@@ -47,5 +47,5 @@ func main() {
 
 	// Launch and permit graceful shutdown, allowing up to 10 seconds for existing
 	// connections to end
-	graceful.Run(":3001", 10*time.Second, mw)
+	graceful.Run(":3001", 10*time.Second, context.ClearHandler(mw))
 }
