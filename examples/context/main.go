@@ -44,6 +44,7 @@ func main() {
 			next.ServeHTTP(w, req)
 		})
 	})
+	mw.Use(context.ClearHandler)
 
 	// Launch and permit graceful shutdown, allowing up to 10 seconds for existing
 	// connections to end

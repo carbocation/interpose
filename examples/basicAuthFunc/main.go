@@ -43,6 +43,7 @@ func main() {
 			return false
 		}
 	}))
+	protectedMiddlew.Use(context.ClearHandler)
 
 	router.Methods("GET").PathPrefix("/protected").Handler(protectedMiddlew)
 

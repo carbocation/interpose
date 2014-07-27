@@ -48,6 +48,7 @@ func main() {
 			})
 		}
 	}())
+	middle.Use(context.ClearHandler)
 
 	http.ListenAndServe(":3001", middle)
 }
