@@ -19,6 +19,13 @@ still be used. As an example of this, an adaptor for Negroni middleware is avail
 meaning that **any middleware that is Negroni compliant is also Interpose compliant**. 
 The same is true for Martini middleware.
 
+## API change
+
+Please note that the API has recently changed. Previously, the framework applied
+middleware in LIFO order. Now it applies middleware in FIFO order.
+
+## Usage
+
 To use, first:
 
 `go get github.com/carbocation/interpose`
