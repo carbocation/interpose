@@ -30,7 +30,7 @@ To use, first:
 
 `go get github.com/carbocation/interpose`
 
-## basic usage example
+## Basic usage example
 
 Here is one example of using Interpose to execute 
 middleware that adds the HTTP header "X-Server-Name" to every response.
