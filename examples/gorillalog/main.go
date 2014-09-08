@@ -12,18 +12,17 @@ import (
 func main() {
 	middle := interpose.New()
 
-	router := mux.NewRouter()
+	// First apply any middleware that will not write output to http body
+	// but which may (or may not) modify headers
+	middle.Use(middleware.GorillaLog())
 
+	// Now apply any middleware that might modify the http body. This permits the
+	// preceding middleware to alter headers
+	router := mux.NewRouter()
 	router.HandleFunc("/{user}", func(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(w, "Welcome to the home page, %s!", mux.Vars(req)["user"])
 	})
-
-	// First apply any middleware that modify the http body, since the first
-	// added will be the last applied. This permits other middleware to alter headers
 	middle.UseHandler(router)
-
-	// Now apply any middleware that will not write output to http body
-	middle.Use(middleware.GorillaLog())
 
 	http.ListenAndServe(":3001", middle)
 }

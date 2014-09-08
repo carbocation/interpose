@@ -40,26 +40,26 @@ import (
 )
 
 func main() {
-	// In this example, we use a basic router with a catchall route that
-	// matches any path. In other examples in this project, we use a
-	// more advanced router.
-	router := http.NewServeMux()
-	router.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		fmt.Fprintf(w, "Welcome to %s!", req.URL.Path)
-	}))
-
 	middle := interpose.New()
-
-	// Apply the router. The first added is the last executed, so by adding
-	// the router first, our other middleware can modify HTTP headers before our
-	// router writes to the HTTP Body
-	middle.UseHandler(router)
 
 	// Send a header telling the world this is coming from an Interpose Test Server
 	// You could imagine setting Content-type application/json or other useful
 	// headers in other circumstances.
 	middle.UseHandler(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		rw.Header().Set("X-Server-Name", "Interpose Test Server")
+	}))
+
+	// In this example, we use a basic router with a catchall route that
+	// matches any path. In other examples in this project, we use a
+	// more advanced router.
+	// The last middleware added is the last executed, so by adding the router
+	// last, our other middleware get a chance to modify HTTP headers before our
+	// router writes to the HTTP Body
+	router := http.NewServeMux()
+	middle.UseHandler(router)
+
+	router.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		fmt.Fprintf(w, "Welcome to %s!", req.URL.Path)
 	}))
 
 	http.ListenAndServe(":3001", middle)
@@ -81,18 +81,18 @@ a stack of native net/http middleware. Unlike other middleware libraries which
 create their own net/http-like signatures, interpose uses literal net/http
 signatures, thus minimizing package lock-in and maximizing inter-compatibility.
 
-Middleware is called in nested LIFO fashion, which means that the last middleware
+Middleware is called in nested FIFO fashion, which means that the first middleware
 to be added will be the first middleware to be called. Because the middleware is
-nested, it actually means that the last middleware to be added gets the
+nested, it actually means that the first middleware to be added gets the
 opportunity to make the first and the last calls in the stack. For example,
 if there are 3 middlewares added in order (0, 1, 2), the calls look like so:
 
-	//2 START
+	//0 START
 		//1 START
-			//0 START
-			//0 END
+			//2 START
+			//2 END
 		//1 END
-	//2 END
+	//0 END
 
 ## Middleware
 
@@ -135,7 +135,7 @@ can use `adaptors.FromNegroni`:
 
 ## More examples
 
-### Routing, graceful shutdown, and JSON headers
+### Routing, graceful shutdown, and headers
 
 In this example, we use the `graceful` package to gracefully release 
 connections after the shutdown signal is encountered. A more powerful 
@@ -157,25 +157,27 @@ import (
 )
 
 func main() {
-	router := mux.NewRouter()
-
-	router.HandleFunc("/{user}", func(w http.ResponseWriter, req *http.Request) {
-		fmt.Fprintf(w, "Welcome to the home page, %s!", mux.Vars(req)["user"])
-	})
-
 	middle := interpose.New()
 
-	// Apply the router. By adding it first, all of our other middleware will be
-	// executed before the router, allowing us to modify headers before any
-	// output has been generated.
-	middle.UseHandler(router)
-
-	// Tell the browser which server this came from
+	// Tell the browser which server this came from.
+	// This modifies headers, so we want this to be called before
+	// any middleware which might modify the body (in HTTP, the headers cannot be
+	// modified after the body is modified)
 	middle.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 			rw.Header().Set("X-Server-Name", "Interpose Test Server")
 			next.ServeHTTP(rw, req)
 		})
+	})
+
+	// Apply the router. By adding it last, all of our other middleware will be
+	// executed before the router, allowing us to modify headers before any
+	// output has been generated.
+	router := mux.NewRouter()
+	middle.UseHandler(router)
+
+	router.HandleFunc("/{user}", func(w http.ResponseWriter, req *http.Request) {
+		fmt.Fprintf(w, "Welcome to the home page, %s!", mux.Vars(req)["user"])
 	})
 
 	// Launch and permit graceful shutdown, allowing up to 10 seconds for existing
@@ -206,25 +208,25 @@ import (
 func main() {
 	middle := interpose.New()
 
-	router := mux.NewRouter()
-	router.HandleFunc("/{user}", func(w http.ResponseWriter, req *http.Request) {
-		fmt.Fprintf(w, "Welcome to the home page, %s!", mux.Vars(req)["user"])
-	})
-
-	// First apply any middleware that modify the http body, since the first
-	// added will be the last applied. This permits other middleware to alter headers
-	middle.UseHandler(router)
-
-	// Now apply any middleware that will not write output to http body
+	// First apply any middleware that will not write output to http body
 
 	// Log to stdout. Taken from Gorilla
 	middle.Use(middleware.GorillaLog())
 
-	// Gzip output. Taken from Negroni
+	// Gzip output that follows. Taken from Negroni
 	middle.Use(middleware.NegroniGzip(gzip.DefaultCompression))
+
+	// Now apply any middleware that modify the http body.
+	router := mux.NewRouter()
+	middle.UseHandler(router)
+
+	router.HandleFunc("/{user}", func(w http.ResponseWriter, req *http.Request) {
+		fmt.Fprintf(w, "Welcome to the home page, %s!", mux.Vars(req)["user"])
+	})
 
 	http.ListenAndServe(":3001", middle)
 }
+
 
 ```
 
@@ -249,14 +251,16 @@ import (
 func main() {
 	middle := interpose.New()
 
-	router := mux.NewRouter()
-	router.Handle("/{name}", http.HandlerFunc(welcomeHandler))
-	router.PathPrefix("/green").Subrouter().Handle("/{name}", Green(http.HandlerFunc(welcomeHandler)))
+	// Invoke the Gorilla framework's combined logger
+	middle.Use(middleware.GorillaLog())
 
+	// Create a router to serve HTTP content at two paths
+	// and tell our middleware about the router
+	router := mux.NewRouter()
 	middle.UseHandler(router)
 
-	// Using Gorilla framework's combined logger
-	middle.Use(middleware.GorillaLog())
+	router.PathPrefix("/green").Subrouter().Handle("/{name}", Green(http.HandlerFunc(welcomeHandler)))
+	router.Handle("/{name}", http.HandlerFunc(welcomeHandler))
 
 	http.ListenAndServe(":3001", middle)
 }
@@ -302,12 +306,8 @@ import (
 func main() {
 	middle := interpose.New()
 
-	router := mux.NewRouter()
-	router.HandleFunc("/{user}", func(w http.ResponseWriter, req *http.Request) {
-		fmt.Fprintf(w, "Welcome to the home page, %s!", mux.Vars(req)["user"])
-	})
-
-	middle.UseHandler(router)
+	// First call middleware that may manipulate HTTP headers, since
+	// they must be called before the HTTP body is manipulated
 
 	// Using Gorilla framework's combined logger
 	middle.Use(middleware.GorillaLog())
@@ -315,20 +315,40 @@ func main() {
 	//Using Negroni's Gzip functionality
 	middle.Use(middleware.NegroniGzip(gzip.DefaultCompression))
 
-	// Now we will define a sub-router based on our love of the color green
-	// When you call any url such as http://localhost:3001/green/man , you will
-	// also see an HTTP header sent called X-Favorite-Color with value "green"
-	greenRouter := mux.NewRouter().Methods("GET").PathPrefix("/green").Subrouter()
-	greenRouter.HandleFunc("/{user}", func(w http.ResponseWriter, req *http.Request) {
-		fmt.Fprintf(w, "Welcome to the home page, green %s!", mux.Vars(req)["user"])
+	// Now call middleware that can manipulate the HTTP body
+
+	// Define the router. Note that we can add the router to our
+	// middleware stack before we define the routes, if we want.
+	router := mux.NewRouter()
+	middle.UseHandler(router)
+
+	// Configure our router
+	router.HandleFunc("/{user}", func(w http.ResponseWriter, req *http.Request) {
+		fmt.Fprintf(w, "Welcome to the home page, %s!", mux.Vars(req)["user"])
 	})
 
+	// Define middleware that will apply to only some routes
 	greenMiddle := interpose.New()
-	greenMiddle.UseHandler(greenRouter)
+
+	// Tell the main router to send /green requests to our subrouter.
+	// Again, we can do this before defining the full middleware stack.
+	router.Methods("GET").PathPrefix("/green").Handler(greenMiddle)
+
+	// Within the secondary middleware, just like above, we want to call anything that
+	// will modify the HTTP headers before anything that will modify the body
 	greenMiddle.UseHandler(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		rw.Header().Set("X-Favorite-Color", "green")
 	}))
-	router.Methods("GET").PathPrefix("/green").Handler(greenMiddle)
+
+	// Finally, define a sub-router based on our love of the color green
+	// When you call any url such as http://localhost:3001/green/man , you will
+	// also see an HTTP header sent called X-Favorite-Color with value "green"
+	greenRouter := mux.NewRouter().Methods("GET").PathPrefix("/green").Subrouter() //Headers("Accept", "application/json")
+	greenMiddle.UseHandler(greenRouter)
+
+	greenRouter.HandleFunc("/{user}", func(w http.ResponseWriter, req *http.Request) {
+		fmt.Fprintf(w, "Welcome to the home page, green %s!", mux.Vars(req)["user"])
+	})
 
 	http.ListenAndServe(":3001", middle)
 }

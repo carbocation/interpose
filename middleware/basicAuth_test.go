@@ -35,13 +35,13 @@ func Test_BasicAuth(t *testing.T) {
 	auth := "Basic " + base64.StdEncoding.EncodeToString([]byte("foo:bar"))
 
 	i := interpose.New()
+	i.Use(BasicAuth("foo", "bar"))
 	i.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			w.Write([]byte("hello"))
 			next.ServeHTTP(w, req)
 		})
 	})
-	i.Use(BasicAuth("foo", "bar"))
 
 	r, _ := http.NewRequest("GET", "foo", nil)
 	i.ServeHTTP(recorder, r)
@@ -83,15 +83,16 @@ func Test_BasicAuthFunc(t *testing.T) {
 		encoded := "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
 
 		i := interpose.New()
+		i.Use(BasicAuthFunc(func(username, password string, _ *http.Request) bool {
+			return (username == "foo" || username == "bar") && password == "spam"
+		}))
+
 		i.Use(func(next http.Handler) http.Handler {
 			return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 				w.Write([]byte("hello"))
 				next.ServeHTTP(w, req)
 			})
 		})
-		i.Use(BasicAuthFunc(func(username, password string, _ *http.Request) bool {
-			return (username == "foo" || username == "bar") && password == "spam"
-		}))
 
 		r, _ := http.NewRequest("GET", "foo", nil)
 

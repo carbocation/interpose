@@ -19,8 +19,21 @@ const (
 )
 
 func main() {
-	router := mux.NewRouter()
+	mw := interpose.New()
 
+	// Set a random integer everytime someone loads the page
+	mw.Use(context.ClearHandler)
+	mw.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			c := rand.Int()
+			fmt.Println("Setting ctx count to:", c)
+			context.Set(req, CountKey, c)
+			next.ServeHTTP(w, req)
+		})
+	})
+
+	// Apply the router.
+	router := mux.NewRouter()
 	router.HandleFunc("/{user}", func(w http.ResponseWriter, req *http.Request) {
 		c, ok := context.GetOk(req, CountKey)
 		if !ok {
@@ -30,21 +43,7 @@ func main() {
 		fmt.Fprintf(w, "Welcome to the home page, %s!\nCount:%d", mux.Vars(req)["user"], c)
 
 	})
-
-	mw := interpose.New()
-
-	// Apply the router.
 	mw.UseHandler(router)
-
-	mw.Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			c := rand.Int()
-			fmt.Println("Setting ctx count to:", c)
-			context.Set(req, CountKey, c)
-			next.ServeHTTP(w, req)
-		})
-	})
-	mw.Use(context.ClearHandler)
 
 	// Launch and permit graceful shutdown, allowing up to 10 seconds for existing
 	// connections to end

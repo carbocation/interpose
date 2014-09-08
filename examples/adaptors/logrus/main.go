@@ -22,14 +22,14 @@ func main() {
 
 	mw := interpose.New()
 
-	// Apply the router. By adding it first, all of our other middleware will be
-	// executed before the router, allowing us to modify headers before any
-	// output has been generated.
-	mw.UseHandler(router)
-
 	// Use logrus
 	x := negroni.Handler(negronilogrus.NewMiddleware())
 	mw.Use(adaptors.FromNegroni(x))
+
+	// Apply the router. By adding it last, all of our other middleware will be
+	// executed before the router, allowing us to modify headers before any
+	// output has been generated.
+	mw.UseHandler(router)
 
 	// Launch and permit graceful shutdown, allowing up to 10 seconds for existing
 	// connections to end

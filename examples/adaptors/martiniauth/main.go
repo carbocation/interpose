@@ -18,10 +18,12 @@ func main() {
 	})
 
 	middle := interpose.New()
-	middle.UseHandler(router)
 
 	// Use Martini-Auth, a Martini library for basic HTTP authentication
 	middle.Use(adaptors.FromMartini(auth.Basic("user", "basic")))
+
+	// Finally, add the router
+	middle.UseHandler(router)
 
 	// Now visit http://localhost:3001/guest and enter username "user"
 	// and password "basic"

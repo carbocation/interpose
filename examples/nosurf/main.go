@@ -32,7 +32,14 @@ var templ = template.Must(template.New("t1").Parse(`
 `))
 
 func main() {
+	mw := interpose.New()
+
+	// Invoke NoSurf (it modifies headers so must be called before your router)
+	mw.Use(middleware.Nosurf())
+
+	// Create and apply the router
 	router := mux.NewRouter()
+	mw.UseHandler(router)
 
 	router.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 		context := make(map[string]string)
@@ -43,12 +50,6 @@ func main() {
 
 		templ.Execute(w, context)
 	})
-
-	mw := interpose.New()
-
-	// Apply the router.
-	mw.UseHandler(router)
-	mw.Use(middleware.Nosurf())
 
 	// Launch and permit graceful shutdown, allowing up to 10 seconds for existing
 	// connections to end
