@@ -3,7 +3,7 @@ package adaptors
 import (
 	"net/http"
 
-	"github.com/codegangsta/martini"
+	"github.com/go-martini/martini"
 )
 
 func FromMartini(handler martini.Handler) func(http.Handler) http.Handler {
