@@ -34,7 +34,6 @@ func main() {
 	})
 
 	protectedMiddlew := interpose.New()
-	protectedMiddlew.UseHandler(protectedRouter)
 	protectedMiddlew.Use(middleware.BasicAuthFunc(func(user, pass string, req *http.Request) bool {
 		if middleware.SecureCompare(user, "admin") && middleware.SecureCompare(pass, "guessme") {
 			context.Set(req, authKey, user)
@@ -44,6 +43,7 @@ func main() {
 		}
 	}))
 	protectedMiddlew.Use(context.ClearHandler)
+	protectedMiddlew.UseHandler(protectedRouter)
 
 	router.Methods("GET").PathPrefix("/protected").Handler(protectedMiddlew)
 

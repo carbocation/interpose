@@ -26,10 +26,13 @@ func main() {
 		fmt.Fprintf(w, "Welcome to the protected page!")
 	})
 
+	// Define middleware that pertains to the part of the site protected behind HTTP Auth
+	// and add the protected router to the protected middleware
 	protectedMiddlew := interpose.New()
-	protectedMiddlew.UseHandler(protectedRouter)
 	protectedMiddlew.Use(middleware.BasicAuth("john", "doe"))
+	protectedMiddlew.UseHandler(protectedRouter)
 
+	// Add the protected middleware and its router to the main router
 	router.Methods("GET").PathPrefix("/protected").Handler(protectedMiddlew)
 
 	http.ListenAndServe(":3001", middle)

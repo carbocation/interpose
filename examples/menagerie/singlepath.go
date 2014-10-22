@@ -12,14 +12,16 @@ import (
 func main() {
 	middle := interpose.New()
 
-	router := mux.NewRouter()
-	router.Handle("/{name}", http.HandlerFunc(welcomeHandler))
-	router.PathPrefix("/green").Subrouter().Handle("/{name}", Green(http.HandlerFunc(welcomeHandler)))
+	// Invoke the Gorilla framework's combined logger
+	middle.Use(middleware.GorillaLog())
 
+	// Create a router to serve HTTP content at two paths
+	// and tell our middleware about the router
+	router := mux.NewRouter()
 	middle.UseHandler(router)
 
-	// Using Gorilla framework's combined logger
-	middle.Use(middleware.GorillaLog())
+	router.PathPrefix("/green").Subrouter().Handle("/{name}", Green(http.HandlerFunc(welcomeHandler)))
+	router.Handle("/{name}", http.HandlerFunc(welcomeHandler))
 
 	http.ListenAndServe(":3001", middle)
 }

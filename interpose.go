@@ -69,9 +69,9 @@ func (mw *Middleware) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	//Initialize with an empty http.Handler
 	next := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {}))
 
-	//Call the middleware stack
-	for _, generate := range mw.Wares {
-		next = generate(next)
+	//Call the middleware stack in FIFO order
+	for i := len(mw.Wares) - 1; i >= 0; i-- {
+		next = mw.Wares[i](next)
 	}
 
 	//Finally, serve back up the chain

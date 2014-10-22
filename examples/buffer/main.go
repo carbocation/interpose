@@ -12,13 +12,12 @@ import (
 )
 
 func main() {
-	router := mux.NewRouter()
-
-	router.HandleFunc("/{user}", func(w http.ResponseWriter, req *http.Request) {
-		fmt.Fprintf(w, "Welcome to the home page, %s!", mux.Vars(req)["user"])
-	})
-
 	mw := interpose.New()
+
+	// Turn on output buffering. It's added first because it encapsulates all other output.
+	// This enables headers to be written after data is sent, because they're all stored
+	// in a buffer, so the user's browser will see everything in the order it expects.
+	mw.Use(middleware.Buffer())
 
 	// Tell the browser our output will be JSON. Note that because this is added
 	// before the router, we will write JSON headers AFTER the router starts
@@ -34,12 +33,11 @@ func main() {
 	})
 
 	// Apply the router.
+	router := mux.NewRouter()
+	router.HandleFunc("/{user}", func(w http.ResponseWriter, req *http.Request) {
+		fmt.Fprintf(w, "Welcome to the home page, %s!", mux.Vars(req)["user"])
+	})
 	mw.UseHandler(router)
-
-	// Turn on output buffering. It's added last so it will be called first. This
-	// enables headers to be written after data is sent, because they're all stored
-	// in a buffer, so the user's browser will see everything in the order it expects.
-	mw.Use(middleware.Buffer())
 
 	// Launch and permit graceful shutdown, allowing up to 10 seconds for existing
 	// connections to end
