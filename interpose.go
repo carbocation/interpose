@@ -21,11 +21,14 @@ if there are 3 middlewares added in order (0, 1, 2), the calls look like so:
 package interpose
 
 import (
+	"fmt"
 	"net/http"
 )
 
 type Middleware struct {
-	Wares []func(http.Handler) http.Handler
+	compiled      bool
+	compiledStack http.Handler
+	Wares         []func(http.Handler) http.Handler
 }
 
 // Return an empty middleware that is ready to use
@@ -56,8 +59,30 @@ func (mw *Middleware) UseHandler(handler http.Handler) {
 	mw.Use(x)
 }
 
+func (mw *Middleware) Compile() error {
+	if mw.compiled {
+		return fmt.Errorf("interpose:Compile: This stack has already been compiled")
+	}
+	mw.compiled = true
+
+	//Initialize with an empty http.Handler
+	mw.compiledStack = http.Handler(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {}))
+
+	//Build the middleware stack in FIFO order
+	for i := len(mw.Wares) - 1; i >= 0; i-- {
+		mw.compiledStack = mw.Wares[i](mw.compiledStack)
+	}
+
+	return nil
+}
+
 // Satisfies the net/http Handler interface and calls the middleware stack
 func (mw *Middleware) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	if mw.compiled {
+		mw.compiledStack.ServeHTTP(w, req)
+		return
+	}
+
 	if len(mw.Wares) < 1 {
 		return
 	}
