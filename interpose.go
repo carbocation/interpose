@@ -24,6 +24,10 @@ import (
 	"net/http"
 )
 
+var (
+	emptyHandler = http.Handler(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {}))
+)
+
 type Middleware struct {
 	Wares []func(http.Handler) http.Handler
 }
@@ -56,19 +60,26 @@ func (mw *Middleware) UseHandler(handler http.Handler) {
 	mw.Use(x)
 }
 
-// Satisfies the net/http Handler interface and calls the middleware stack
-func (mw *Middleware) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	if len(mw.Wares) < 1 {
-		return
-	}
-
+// Handler returns the composed handler of all the wares. Warning: you would need to
+// call this again if you change the wares.
+func (mw *Middleware) Handler() http.Handler {
 	//Initialize with an empty http.Handler
-	next := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {}))
+	next := emptyHandler
 
 	//Call the middleware stack in FIFO order
 	for i := len(mw.Wares) - 1; i >= 0; i-- {
 		next = mw.Wares[i](next)
 	}
+	return next
+}
+
+// Satisfies the net/http Handler interface and calls the middleware stack
+func (mw *Middleware) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	if len(mw.Wares) < 1 {
+		return
+	}
+	
+	next := mw.Handler()
 
 	//Finally, serve back up the chain
 	next.ServeHTTP(w, req)
