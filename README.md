@@ -126,7 +126,7 @@ Some frameworks that are not strictly `http.Handler` compliant use middleware th
 can be readily converted into Interpose-compliant middleware. So far, adaptors for 
 Martini and Negroni have been created. 
 
-For example, to use github.com/codegangsta/negroni middleware in Interpose, you 
+For example, to use github.com/urfave/negroni middleware in Interpose, you 
 can use `adaptors.FromNegroni`:
 
 ```go

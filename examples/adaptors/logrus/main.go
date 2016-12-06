@@ -7,7 +7,7 @@ import (
 
 	"github.com/carbocation/interpose"
 	"github.com/carbocation/interpose/adaptors"
-	"github.com/codegangsta/negroni"
+	"github.com/urfave/negroni"
 	"github.com/gorilla/mux"
 	"github.com/meatballhat/negroni-logrus"
 	"github.com/stretchr/graceful"
