@@ -3,7 +3,7 @@ package adaptors
 import (
 	"net/http"
 
-	"github.com/codegangsta/negroni"
+	"github.com/urfave/negroni"
 )
 
 func FromNegroni(handler negroni.Handler) func(http.Handler) http.Handler {
